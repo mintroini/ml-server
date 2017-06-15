@@ -1,9 +1,11 @@
 const express = require('express');
 const request = require('request');
+var cors = require('cors');
 const _ = require('underscore');
 
 const app = express();
 
+app.use(cors());
 app.set('port', (process.env.PORT || 3001));
 
 //Set Body Parser for JSON
