@@ -66,7 +66,7 @@ app.get('/api/items/:id', (req, res, next) => {
                     title: item.title,
                     price: {
                         currency: item.currency_id,
-                        amount: item.price,
+                        amount: Math.floor(item.price),
                         decimals: getDecimal(item.price),
                     },
                     //picture: _.pluck(item.pictures, 'url'),
@@ -154,6 +154,19 @@ app.get('/api/items', (req, res) => {
             // });
 
             let allItems = JSON.parse(body).results;
+            let allFilters = JSON.parse(body).filters;
+
+            let ml_filters= ( allFilters &&
+                              allFilters[0] &&
+                              allFilters[0].values &&
+                              allFilters[0].values[0] &&
+                              allFilters[0].values[0].path_from_root
+                            ) ? allFilters[0].values[0].path_from_root : [];
+
+            ml_filters = _.pluck(ml_filters, 'name');
+
+            jsonresp.categories = ml_filters;
+
             if (allItems) {
                 //get length for resp
                 let length = (allItems.length > maxSearch) ? maxSearch : allItems.length;
@@ -167,7 +180,7 @@ app.get('/api/items', (req, res) => {
                         title: currentItem.title,
                         price: {
                             currency: currentItem.currency_id,
-                            amount: currentItem.price,
+                            amount: Math.floor(currentItem.price),
                             decimals: getDecimal(currentItem.price)
                         },
                         picture: currentItem.thumbnail,
@@ -183,7 +196,7 @@ app.get('/api/items', (req, res) => {
 });
 
 function getDecimal(amount) {
-    return Number((amount - Math.floor(amount)).toFixed(2));
+    return (Number((amount - Math.floor(amount)).toFixed(2))* 100);
 }
 
 app.listen(app.get('port'), () => {
