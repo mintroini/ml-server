@@ -19,7 +19,7 @@ if (process.env.NODE_ENV === 'production') {
 app.get('/api/items/:id', (req, res, next) => {
     console.log("Call for: items/:id");
     const param = req.params.id;
-    const item_url = "https://api.mercadolibre.com/items/";
+    const ml_url = "https://api.mercadolibre.com";
     let was_error = false;
 
     //   https://api.mercadolibre.com/items/MLA626101408
@@ -45,7 +45,7 @@ app.get('/api/items/:id', (req, res, next) => {
     };
 
     request({
-        url: item_url + param,
+        url: ml_url+'/items/' + param,
         method: 'GET',
         headers: { // speciyfy the headers
             'Content-Type': 'application/json'
@@ -59,6 +59,8 @@ app.get('/api/items/:id', (req, res, next) => {
         } else if (response.statusCode && response.statusCode === 200) {
             let item = JSON.parse(body);
             if (item) {
+                // get category_id for pdp breadcrumbs
+                let category_id = item.category_id;
                 //get all plain data
                 _.extend(jsonresp.item, {
 
@@ -74,12 +76,38 @@ app.get('/api/items/:id', (req, res, next) => {
                     condition: item.condition,
                     free_shipping: item.shipping.free_shipping,
                     sold_quantity: item.sold_quantity,
+
                 });
 
+                //looking for categories breadcrumbs
+                //https://api.mercadolibre.com/categories/MLA386061
+                request({
+                    url: ml_url + '/categories/' + category_id,
+                    method: 'GET',
+                    headers: { // speciyfy the headers
+                        'Content-Type': 'application/json'
+                    }
+                }, function (error, response, body) {
 
+                    if (error) {
+                        //leaving this extra check to see on console what is going on
+                        console.log(error);
+                        res.json(jsonresp);
+                        return;
+                    } else if (response.statusCode && response.statusCode === 200) {
+
+                        let breadcrumbs = JSON.parse(body).path_from_root ||[];
+                        if (breadcrumbs) {
+                          console.log("breadcrumbs", breadcrumbs);
+                             _.extend(jsonresp.item, {
+                                 categories: _.pluck(breadcrumbs, 'name'),
+                             });
+                        }
+                    }
+                });
                 //have to look into second level query -> description url
                 request({
-                    url: item_url + param + '/description',
+                    url: ml_url+'/items/' + param + '/description',
                     method: 'GET',
                     headers: { // speciyfy the headers
                         'Content-Type': 'application/json'
@@ -101,6 +129,9 @@ app.get('/api/items/:id', (req, res, next) => {
                         }
                     }
                 });
+
+
+
             }
         }
     });
