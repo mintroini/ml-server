@@ -98,7 +98,6 @@ app.get('/api/items/:id', (req, res, next) => {
 
                         let breadcrumbs = JSON.parse(body).path_from_root ||[];
                         if (breadcrumbs) {
-                          console.log("breadcrumbs", breadcrumbs);
                              _.extend(jsonresp.item, {
                                  categories: _.pluck(breadcrumbs, 'name'),
                              });
