@@ -97,6 +97,7 @@ app.get('/api/items/:id', (req, res, next) => {
                     } else if (response.statusCode && response.statusCode === 200) {
 
                         let breadcrumbs = JSON.parse(body).path_from_root ||[];
+                        console.log("breadcrumbs", breadcrumbs);
                         if (breadcrumbs) {
                              _.extend(jsonresp.item, {
                                  categories: _.pluck(breadcrumbs, 'name'),
@@ -119,9 +120,10 @@ app.get('/api/items/:id', (req, res, next) => {
                         return;
                     } else if (response.statusCode && response.statusCode === 200) {
                         let description = JSON.parse(body);
+                        
                         if (description) {
                             _.extend(jsonresp.item, {
-                                description: description.text,
+                                description: (description.text.length>0) ? description.text : description.plain_text,
                             });
                             res.json(jsonresp);
 
