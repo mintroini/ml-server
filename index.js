@@ -146,13 +146,6 @@ app.get('/api/items', (req, res) => {
 
         } else if (response.statusCode && response.statusCode === 200) {
             //parse data from body resp
-
-            // where should I be getting categories from!!!
-            // let filterCategories= JSON.parse(body).filters;
-            // _.each(filterCategories, function (currentCategoryFilter) {
-            //
-            // });
-
             let allItems = JSON.parse(body).results;
             let allFilters = JSON.parse(body).filters;
 
