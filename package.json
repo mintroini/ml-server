@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "dev-start": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -13,7 +14,10 @@
     "body-parser": "^1.17.2",
     "cors": "^2.8.3",
     "express": "^4.15.3",
+    "lodash": "^4.17.4",
+    "nodemon": "^1.11.0",
     "request": "^2.81.0",
+    "request-promise": "^4.2.1",
     "underscore": "^1.8.3"
   }
 }
