@@ -68,7 +68,6 @@ const getItem = (params, callback) => {
         resolveWithFullResponse: true
       })
         .then(({ statusCode, body }) => {
-          console.log("dsadsadsa", statusCode);
           if (statusCode === 200) {
             let breadcrumbs = JSON.parse(body).path_from_root || [];
             if (breadcrumbs) {
@@ -80,33 +79,42 @@ const getItem = (params, callback) => {
           }
           throw new Error("unexpected error");
         })
-        .then(jsonresp => {
-          //have to look into second level query -> description url
-          return request({
-            url: params.ml_url + "/items/" + params.id + "/description",
-            method: "GET",
-            headers: {
-              // speciyfy the headers
-              "Content-Type": "application/json"
-            },
-            resolveWithFullResponse: true
-          }).then(({ statusCode, body }) => {
-            if (statusCode === 200) {
-              let description = JSON.parse(body);
+        .catch(err => {
+          console.log("Categories not available, IGNORE");
+          return jsonresp;
+        });
+    })
+    .then(jsonresp => {
+      //have to look into second level query -> description url
+      return request({
+        url: params.ml_url + "/items/" + params.id + "/description",
+        method: "GET",
+        headers: {
+          // speciyfy the headers
+          "Content-Type": "application/json"
+        },
+        resolveWithFullResponse: true
+      })
+        .then(({ statusCode, body }) => {
+          if (statusCode === 200) {
+            let description = JSON.parse(body);
 
-              if (description) {
-                _.extend(jsonresp.item, {
-                  description: description.text.length > 0
-                    ? description.text
-                    : description.plain_text
-                });
-              }
-              // return callback(error, jsonresp);
-
-              return jsonresp;
+            if (description) {
+              _.extend(jsonresp.item, {
+                description: description.text.length > 0
+                  ? description.text
+                  : description.plain_text
+              });
             }
-            throw new Error("unexpected error");
-          });
+            // return callback(error, jsonresp);
+
+            return jsonresp;
+          }
+          throw new Error("unexpected error");
+        })
+        .catch(err => {
+          console.log("Description not available, IGNORE");
+          return jsonresp;
         });
     });
 };
